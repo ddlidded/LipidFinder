@@ -246,6 +246,43 @@ def run_python_module(module_name, args_list):
     return cmd, proc
 
 
+@app.route("/api/listdir", methods=["GET"])
+def api_listdir():
+    """List directories and files under a given path within the app root.
+    Restricts traversal to BASE_DIR (mounted at /app in Docker).
+    """
+    raw_path = request.args.get("path", str(BASE_DIR))
+    try:
+        base_real = os.path.realpath(str(BASE_DIR))
+        target_real = os.path.realpath(raw_path)
+        # Security: ensure target is under BASE_DIR
+        if not target_real.startswith(base_real):
+            return jsonify({"error": "Path outside allowed root"}), 400
+        if not os.path.exists(target_real):
+            return jsonify({"error": "Path not found"}), 404
+        entries = []
+        for name in sorted(os.listdir(target_real)):
+            path = os.path.join(target_real, name)
+            try:
+                is_dir = os.path.isdir(path)
+            except Exception:
+                is_dir = False
+            entries.append({
+                "name": name,
+                "path": path,
+                "is_dir": bool(is_dir),
+            })
+        parent = os.path.dirname(target_real) if target_real != base_real else None
+        return jsonify({
+            "path": target_real,
+            "parent": parent,
+            "entries": entries,
+            "root": base_real,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/pipeline", methods=["GET"])
 def pipeline():
     # Show forms to run PeakFilter, Amalgamator, MSSearch
@@ -545,4 +582,4 @@ def serve_file():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))
-    app.run(host="127.0.0.1", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)

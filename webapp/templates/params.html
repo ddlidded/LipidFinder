@@ -20,7 +20,11 @@
           {% elif typ == 'bool' %}
             <input type="checkbox" name="{{ key }}" id="{{ key }}" {% if values[key] %}checked{% endif %} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded" />
           {% elif typ == 'path' %}
-            <input type="text" name="{{ key }}" id="{{ key }}" value="{{ values[key] or '' }}" placeholder="Absolute path or relative to repo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+            <div class="mb-2 flex items-center justify-between">
+              <label for="{{ key }}" class="text-sm font-medium text-gray-900">{{ spec.description }}</label>
+              <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg" data-browse-for="{{ key }}">Browse</button>
+            </div>
+            <input type="text" name="{{ key }}" id="{{ key }}" value="{{ values[key] or '' }}" placeholder="Absolute path under /app or mounted volume" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
           {% elif typ == 'str' %}
             <input type="text" name="{{ key }}" id="{{ key }}" value="{{ values[key] or '' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
           {% elif typ in ['int range', 'float range'] %}

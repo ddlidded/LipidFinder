@@ -7,10 +7,10 @@
     <div>
       <div class="flex items-center justify-between mb-2">
         <label for="mzxml_dir" class="block text-sm font-medium text-gray-900">mzXML directory (absolute path)</label>
-        <button type="button" id="browse_mzxml" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg">Browse</button>
+        <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg" data-browse-for="mzxml_dir">Browse</button>
       </div>
-      <input type="text" name="mzxml_dir" id="mzxml_dir" placeholder="e.g. C:\\Data\\mzxml_negative" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
-      <div class="text-xs text-gray-500 mt-1">Select or enter the directory containing the mzXML files. Browse opens a local system dialog (when running the server on your machine).</div>
+      <input type="text" name="mzxml_dir" id="mzxml_dir" placeholder="e.g. /app/outputs/mzxml_negative" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      <div class="text-xs text-gray-500 mt-1">Select or enter the directory containing the mzXML files. Browse navigates the container’s mounted folders.</div>
     </div>
     <div>
       <label for="report_name" class="block mb-2 text-sm font-medium text-gray-900">Report name (no extension)</label>
@@ -27,28 +27,4 @@
     </div>
   </form>
 </section>
-<script>
-  (function() {
-    const btn = document.getElementById('browse_mzxml');
-    if (!btn) return;
-    btn.addEventListener('click', async function() {
-      btn.disabled = true;
-      btn.textContent = 'Opening…';
-      try {
-        const res = await fetch('{{ url_for('browse_dir') }}');
-        const data = await res.json();
-        if (data && typeof data.path === 'string') {
-          document.getElementById('mzxml_dir').value = data.path || '';
-        } else if (data && data.error) {
-          alert('Browse error: ' + data.error);
-        }
-      } catch (e) {
-        alert('Failed to open directory picker. Ensure the server is running locally.');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Browse';
-      }
-    });
-  })();
-</script>
 {% endblock %}

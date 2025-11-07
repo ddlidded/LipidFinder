@@ -48,5 +48,105 @@
     <div class="max-w-screen-xl mx-auto p-6 text-sm text-gray-600">Powered by Flask • Repo: LipidFinder</div>
   </footer>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <!-- Directory Picker Modal -->
+  <div id="dirBrowserOverlay" class="fixed inset-0 bg-black bg-opacity-40 hidden z-40"></div>
+  <div id="dirBrowserModal" class="fixed inset-0 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+      <div class="px-4 py-3 border-b flex items-center justify-between">
+        <h3 class="text-lg font-semibold">Select a folder</h3>
+        <button type="button" id="dirBrowserClose" class="text-gray-500 hover:text-gray-700">✕</button>
+      </div>
+      <div class="p-4">
+        <div class="mb-3 text-sm text-gray-600">Current path: <code id="dirBrowserPath"></code></div>
+        <div class="border rounded max-h-72 overflow-y-auto" id="dirBrowserList"></div>
+      </div>
+      <div class="px-4 py-3 border-t flex justify-between">
+        <button type="button" id="dirBrowserSelect" class="text-white bg-blue-600 hover:bg-blue-700 rounded-lg text-sm px-4 py-2">Select this folder</button>
+        <button type="button" id="dirBrowserCancel" class="text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm px-4 py-2">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const overlay = document.getElementById('dirBrowserOverlay');
+      const modal = document.getElementById('dirBrowserModal');
+      const list = document.getElementById('dirBrowserList');
+      const pathEl = document.getElementById('dirBrowserPath');
+      const btnClose = document.getElementById('dirBrowserClose');
+      const btnCancel = document.getElementById('dirBrowserCancel');
+      const btnSelect = document.getElementById('dirBrowserSelect');
+      let currentPath = null;
+      let targetInputId = null;
+
+      function show(){ overlay.classList.remove('hidden'); modal.classList.remove('hidden'); }
+      function hide(){ overlay.classList.add('hidden'); modal.classList.add('hidden'); targetInputId = null; }
+
+      async function load(path){
+        try {
+          const res = await fetch(`/api/listdir?path=${encodeURIComponent(path)}`);
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          currentPath = data.path;
+          pathEl.textContent = data.path;
+          const entries = data.entries || [];
+          const parent = data.parent;
+          const frag = document.createDocumentFragment();
+          const container = document.createElement('div');
+          container.className = 'divide-y';
+          if (parent) {
+            const up = document.createElement('button');
+            up.className = 'w-full text-left px-3 py-2 hover:bg-gray-50';
+            up.textContent = '⬆️ Go to parent';
+            up.addEventListener('click', ()=> load(parent));
+            container.appendChild(up);
+          }
+          entries.forEach(e => {
+            const row = document.createElement('button');
+            row.className = 'w-full text-left px-3 py-2 hover:bg-gray-50';
+            row.textContent = e.is_dir ? `📁 ${e.name}` : `📄 ${e.name}`;
+            row.disabled = !e.is_dir;
+            row.addEventListener('click', ()=> e.is_dir && load(e.path));
+            container.appendChild(row);
+          });
+          frag.appendChild(container);
+          list.innerHTML = '';
+          list.appendChild(frag);
+        } catch (err) {
+          list.innerHTML = `<div class="p-3 text-red-700">Error: ${err.message}</div>`;
+        }
+      }
+
+      btnClose.addEventListener('click', hide);
+      btnCancel.addEventListener('click', hide);
+      btnSelect.addEventListener('click', function(){
+        if (targetInputId && currentPath) {
+          const input = document.getElementById(targetInputId);
+          if (input) input.value = currentPath;
+        }
+        hide();
+      });
+
+      window.attachDirBrowser = function(buttonId, inputId, startPath){
+        const btn = document.getElementById(buttonId);
+        if (!btn) return;
+        btn.addEventListener('click', function(){
+          targetInputId = inputId;
+          const input = document.getElementById(inputId);
+          const initial = (input && input.value) ? input.value : (startPath || '/app');
+          show();
+          load(initial);
+        });
+      };
+
+      // Auto-bind any button with data-browse-for attribute
+      document.querySelectorAll('[data-browse-for]').forEach(btn => {
+        const inputId = btn.getAttribute('data-browse-for');
+        const start = btn.getAttribute('data-start-path') || '/app';
+        const id = btn.id || `browse_${inputId}`;
+        btn.id = id;
+        attachDirBrowser(id, inputId, start);
+      });
+    })();
+  </script>
 </body>
 </html>
