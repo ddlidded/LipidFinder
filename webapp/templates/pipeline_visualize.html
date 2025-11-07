@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2 class="text-2xl font-semibold mb-3">Pipeline Result</h2>
+  {% if success %}
+    <p class="inline-flex items-center rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-800 mb-3">Pipeline completed successfully.</p>
+  {% else %}
+    <p class="inline-flex items-center rounded bg-red-100 px-2 py-1 text-sm font-medium text-red-800 mb-3">Pipeline failed. Review logs below.</p>
+  {% endif %}
+  <p class="mb-4"><strong>Output Directory:</strong> <code>{{ output_dir }}</code></p>
+
+  <h3 class="text-xl font-semibold mb-3">Execution Logs</h3>
+  {% for entry in logs %}
+    <details {% if not entry.success %}open{% endif %} class="mb-4">
+      <summary class="cursor-pointer px-3 py-2 bg-gray-50 border rounded mb-2">{{ entry.title }} — <code>{{ entry.command }}</code> {% if entry.success %}<span class="ml-2 inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">ok</span>{% else %}<span class="ml-2 inline-flex items-center rounded bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">error</span>{% endif %}</summary>
+      <div>
+        <h4 class="font-medium mb-1">Stdout</h4>
+        <pre class="bg-gray-50 border rounded p-3 text-sm overflow-x-auto mb-3">{{ entry.stdout }}</pre>
+        <h4 class="font-medium mb-1">Stderr</h4>
+        <pre class="bg-gray-50 border rounded p-3 text-sm overflow-x-auto">{{ entry.stderr }}</pre>
+      </div>
+    </details>
+  {% endfor %}
+
+  {% if success %}
+    <h3 class="text-xl font-semibold mb-3">Outputs</h3>
+    <ul class="list-disc pl-5 text-gray-800 space-y-1 mb-6">
+      {% if amalgamated_csv %}<li>Amalgamated CSV: <a class="text-blue-700 hover:underline" href="{{ url_for('serve_file', path=amalgamated_csv) }}" target="_blank">download</a></li>{% endif %}
+      {% if full_xlsx %}<li>MSSearch results XLSX: <a class="text-blue-700 hover:underline" href="{{ url_for('serve_file', path=full_xlsx) }}" target="_blank">download</a></li>{% endif %}
+      {% if summary_xlsx %}<li>MSSearch summary XLSX: <a class="text-blue-700 hover:underline" href="{{ url_for('serve_file', path=summary_xlsx) }}" target="_blank">download</a></li>{% endif %}
+    </ul>
+
+    {% if scatter_png %}
+      <h3 class="text-xl font-semibold mb-3">Category Scatter Plot</h3>
+      <img src="{{ url_for('serve_file', path=scatter_png) }}" alt="Category scatter plot" class="max-w-full border border-gray-200 rounded" />
+    {% endif %}
+
+    {% if category_counts %}
+      <h3 class="text-xl font-semibold mb-3">Category Distribution</h3>
+      <div class="bg-white rounded-lg shadow p-4">
+        <canvas id="catChart" height="350"></canvas>
+      </div>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const catData = {{ category_counts | tojson }};
+        const labels = Object.keys(catData);
+        const values = Object.values(catData);
+        const ctx = document.getElementById('catChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Frame count',
+              data: values,
+              backgroundColor: '#2563eb',
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { ticks: { color: '#374151' } }, y: { ticks: { color: '#374151' } } }
+          }
+        });
+      </script>
+    {% endif %}
+  {% endif %}
+
+  <div class="flex gap-3 mt-6">
+    <a class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5" href="{{ url_for('pipeline') }}">Back to Pipeline</a>
+    <a class="text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5" href="{{ url_for('index') }}">Home</a>
+  </div>
+</section>
+{% endblock %}

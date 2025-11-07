@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2 class="text-2xl font-semibold mb-4">LipidFinder Pipeline</h2>
+
+  <h3 class="text-xl font-semibold mb-3">Run Full Pipeline (Sequential)</h3>
+  <form method="post" action="{{ url_for('run_pipeline_full') }}" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <label for="neg_input" class="block mb-2 text-sm font-medium text-gray-900">Negative input CSV</label>
+        <input type="text" name="neg_input" id="neg_input" placeholder="e.g. C:\\Data\\XCMS\\xcms_negative.csv" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      </div>
+      <div>
+        <label for="pos_input" class="block mb-2 text-sm font-medium text-gray-900">Positive input CSV (optional)</label>
+        <input type="text" name="pos_input" id="pos_input" placeholder="e.g. C:\\Data\\XCMS\\xcms_positive.csv" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      </div>
+      <div class="md:col-span-2">
+        <label for="output_dir" class="block mb-2 text-sm font-medium text-gray-900">Output directory</label>
+        <input type="text" name="output_dir" id="output_dir" placeholder="e.g. C:\\Data\\LipidFinder\\results" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      </div>
+    </div>
+    <div class="text-xs text-gray-600">Uses saved parameters from the Params tabs for PeakFilter, Amalgamator, and MSSearch.</div>
+    <div class="flex flex-wrap items-center gap-6">
+      <label class="inline-flex items-center text-sm text-gray-700"><input type="checkbox" name="verbose" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded mr-2" /> Verbose (intermediate CSVs)</label>
+      <label class="inline-flex items-center text-sm text-gray-700"><input type="checkbox" name="timestamp" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded mr-2" /> Timestamp output folder</label>
+    </div>
+    <div class="flex gap-3">
+      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Run Full Pipeline</button>
+    </div>
+  </form>
+
+  <h3 class="text-xl font-semibold mt-8 mb-3">1) PeakFilter</h3>
+  <form method="post" action="{{ url_for('run_peakfilter') }}" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div>
+      <label for="input_path" class="block mb-2 text-sm font-medium text-gray-900">Input file or folder</label>
+      <input type="text" name="input_path" id="input_path" placeholder="e.g. C:\\Data\\XCMS\\xcms_negative.csv" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      <div class="text-xs text-gray-500 mt-1">Provide the CSV from XCMS or a folder of inputs.</div>
+    </div>
+    <div>
+      <label for="output_dir" class="block mb-2 text-sm font-medium text-gray-900">Output directory</label>
+      <input type="text" name="output_dir" id="output_dir" placeholder="e.g. C:\\Data\\LipidFinder\\results" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div class="text-xs text-gray-600">Uses saved PeakFilter parameters (configure under Params).</div>
+    <div class="flex flex-wrap items-center gap-6">
+      <label class="inline-flex items-center text-sm text-gray-700"><input type="checkbox" name="verbose" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded mr-2" /> Verbose (intermediate CSVs)</label>
+      <label class="inline-flex items-center text-sm text-gray-700"><input type="checkbox" name="timestamp" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded mr-2" /> Timestamp output folder</label>
+    </div>
+    <div class="flex gap-3">
+      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Run PeakFilter</button>
+    </div>
+  </form>
+
+  <h3 class="text-xl font-semibold mt-8 mb-3">2) Amalgamator</h3>
+  <form method="post" action="{{ url_for('run_amalgamator') }}" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div>
+      <label for="neg_file" class="block mb-2 text-sm font-medium text-gray-900">Negative summary CSV</label>
+      <input type="text" name="neg_file" id="neg_file" placeholder="e.g. results\\peakfilter_negative_summary.csv" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div>
+      <label for="pos_file" class="block mb-2 text-sm font-medium text-gray-900">Positive summary CSV</label>
+      <input type="text" name="pos_file" id="pos_file" placeholder="e.g. results\\peakfilter_positive_summary.csv" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div>
+      <label for="output_dir" class="block mb-2 text-sm font-medium text-gray-900">Output directory</label>
+      <input type="text" name="output_dir" id="output_dir" placeholder="e.g. C:\\Data\\LipidFinder\\results" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div class="text-xs text-gray-600">Uses saved Amalgamator parameters (configure under Params).</div>
+    <div class="flex gap-3">
+      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Run Amalgamator</button>
+    </div>
+  </form>
+
+  <h3 class="text-xl font-semibold mt-8 mb-3">3) MSSearch</h3>
+  <form method="post" action="{{ url_for('run_mssearch') }}" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div>
+      <label for="input_file" class="block mb-2 text-sm font-medium text-gray-900">Input file (PeakFilter or amalgamated CSV)</label>
+      <input type="text" name="input_file" id="input_file" placeholder="e.g. results\\amalgamated.csv" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div>
+      <label for="output_dir" class="block mb-2 text-sm font-medium text-gray-900">Output directory</label>
+      <input type="text" name="output_dir" id="output_dir" placeholder="e.g. C:\\Data\\LipidFinder\\results" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div class="text-xs text-gray-600">Uses saved MSSearch parameters (configure under Params).</div>
+    <div class="flex gap-3">
+      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Run MSSearch</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

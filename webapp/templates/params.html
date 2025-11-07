@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2 class="text-2xl font-semibold mb-4">Configure Parameters: {{ module|capitalize }}</h2>
+  <form method="post" class="bg-white rounded-lg shadow p-6">
+    <div class="grid md:grid-cols-2 gap-6">
+      {% for key, spec in specs.items() %}
+        <div>
+          <label for="{{ key }}" class="block mb-2 text-sm font-medium text-gray-900">{{ spec.description }}</label>
+          {% if spec.help %}<div class="text-xs text-gray-500 mb-2">{{ spec.help }}</div>{% endif %}
+          {% set typ = spec.type %}
+          {% if typ == 'selection' %}
+            <select name="{{ key }}" id="{{ key }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+              {% for opt in spec.options %}
+                <option value="{{ opt }}" {% if values[key] == opt %}selected{% endif %}>{{ opt }}</option>
+              {% endfor %}
+            </select>
+          {% elif typ in ['int', 'float'] %}
+            <input type="number" step="{{ 'any' if typ == 'float' else '1' }}" name="{{ key }}" id="{{ key }}" value="{{ values[key] }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+          {% elif typ == 'bool' %}
+            <input type="checkbox" name="{{ key }}" id="{{ key }}" {% if values[key] %}checked{% endif %} class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded" />
+          {% elif typ == 'path' %}
+            <input type="text" name="{{ key }}" id="{{ key }}" value="{{ values[key] or '' }}" placeholder="Absolute path or relative to repo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+          {% elif typ == 'str' %}
+            <input type="text" name="{{ key }}" id="{{ key }}" value="{{ values[key] or '' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+          {% elif typ in ['int range', 'float range'] %}
+            <div class="flex items-center gap-2">
+              <input type="number" step="{{ 'any' if 'float' in typ else '1' }}" name="{{ key }}_a" value="{{ values[key][0] }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 w-32" />
+              <span class="text-gray-600">to</span>
+              <input type="number" step="{{ 'any' if 'float' in typ else '1' }}" name="{{ key }}_b" value="{{ values[key][1] }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 w-32" />
+            </div>
+          {% elif typ == 'pairs' %}
+            <textarea name="{{ key }}" id="{{ key }}" rows="3" placeholder="Enter pairs like M-H|M+Na-2H, M-H|M+Cl" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{% for p in values[key] %}{{ p[0] }}|{{ p[1] }}{% if not loop.last %}, {% endif %}{% endfor %}</textarea>
+          {% else %}
+            <input type="text" name="{{ key }}" id="{{ key }}" value="{{ values[key] or '' }}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Save Parameters</button>
+      <a class="text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5" href="{{ url_for('index') }}">Back</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

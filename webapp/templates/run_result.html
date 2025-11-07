@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2 class="text-2xl font-semibold mb-3">{{ title }}</h2>
+  <p class="mb-2"><strong>Command:</strong> <code>{{ command }}</code></p>
+  {% if success %}
+    <p class="inline-flex items-center rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-800 mb-3">Completed successfully.</p>
+  {% else %}
+    <p class="inline-flex items-center rounded bg-red-100 px-2 py-1 text-sm font-medium text-red-800 mb-3">Completed with errors (see logs below).</p>
+  {% endif %}
+  {% if result_path %}
+    <p class="mb-4"><strong>Result Path:</strong> <code>{{ result_path }}</code></p>
+  {% endif %}
+  <details open class="mb-4">
+    <summary class="cursor-pointer px-3 py-2 bg-gray-50 border rounded mb-2">Stdout</summary>
+    <pre class="bg-gray-50 border rounded p-3 text-sm overflow-x-auto">{{ stdout }}</pre>
+  </details>
+  <details class="mb-6">
+    <summary class="cursor-pointer px-3 py-2 bg-gray-50 border rounded mb-2">Stderr</summary>
+    <pre class="bg-gray-50 border rounded p-3 text-sm overflow-x-auto">{{ stderr }}</pre>
+  </details>
+  <div class="flex gap-3">
+    <a class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5" href="{{ url_for('pipeline') }}">Back to Pipeline</a>
+    <a class="text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5" href="{{ url_for('index') }}">Home</a>
+  </div>
+</section>
+{% endblock %}

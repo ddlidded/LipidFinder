@@ -1,0 +1,14 @@
+{
+    "mzCol": "",
+    "rtCol": "",
+    "database": "COMP_DB",
+    "mzTolerance": 4.0,
+    "mzToleranceUnit": "PPM",
+    "evenChains": false,
+    "targetAdducts": "['[M-H]-', '[M+H]+', '[M+Na]+', '[M+NH4]+', '[M.OAc]-']",
+    "categories": "",
+    "summary": true,
+    "plotCategories": true,
+    "figFormat": "pdf",
+    "figColors": "standard"
+}

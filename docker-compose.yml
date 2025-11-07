@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lipidfinder-web
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=production
+      - PORT=8080
+    volumes:
+      # Persist saved params and pipeline config
+      - ./webapp/config:/app/webapp/config
+      # Make docs (xcms.R) accessible inside container
+      - ./docs:/app/docs
+      # Optional: a host directory for outputs you reference from the UI
+      - ./outputs:/app/outputs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+networks:
+  default:
+    name: lipidfinder-net

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2 class="text-2xl font-semibold mb-3">Run XCMS</h2>
+  <p class="text-gray-700 mb-4">Runs the provided <code>docs/xcms.R</code> script to process mzXML files and produce a CSV report.</p>
+  <form method="post" class="bg-white rounded-lg shadow p-6 space-y-6">
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <label for="mzxml_dir" class="block text-sm font-medium text-gray-900">mzXML directory (absolute path)</label>
+        <button type="button" id="browse_mzxml" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg">Browse</button>
+      </div>
+      <input type="text" name="mzxml_dir" id="mzxml_dir" placeholder="e.g. C:\\Data\\mzxml_negative" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      <div class="text-xs text-gray-500 mt-1">Select or enter the directory containing the mzXML files. Browse opens a local system dialog (when running the server on your machine).</div>
+    </div>
+    <div>
+      <label for="report_name" class="block mb-2 text-sm font-medium text-gray-900">Report name (no extension)</label>
+      <input type="text" name="report_name" id="report_name" value="xcms_report" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+    </div>
+    <div>
+      <label for="rscript_path" class="block mb-2 text-sm font-medium text-gray-900">Rscript path</label>
+      <input type="text" name="rscript_path" id="rscript_path" value="Rscript" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+      <div class="text-xs text-gray-500 mt-1">Use full path if Rscript is not on PATH.</div>
+    </div>
+    <div class="flex gap-3">
+      <button type="submit" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Run XCMS</button>
+      <a class="text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5" href="{{ url_for('index') }}">Back</a>
+    </div>
+  </form>
+</section>
+<script>
+  (function() {
+    const btn = document.getElementById('browse_mzxml');
+    if (!btn) return;
+    btn.addEventListener('click', async function() {
+      btn.disabled = true;
+      btn.textContent = 'Opening…';
+      try {
+        const res = await fetch('{{ url_for('browse_dir') }}');
+        const data = await res.json();
+        if (data && typeof data.path === 'string') {
+          document.getElementById('mzxml_dir').value = data.path || '';
+        } else if (data && data.error) {
+          alert('Browse error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Failed to open directory picker. Ensure the server is running locally.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Browse';
+      }
+    });
+  })();
+</script>
+{% endblock %}
