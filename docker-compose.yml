@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     container_name: lipidfinder-web
     ports:
-      - "8080:8080"
+      - "8052:8052"
     environment:
       - FLASK_ENV=production
-      - PORT=8080
+      - PORT=8052
     volumes:
       # Persist saved params and pipeline config
       - ./webapp/config:/app/webapp/config
